@@ -46,5 +46,14 @@ services:
     depends_on:
       - backend
 
+  mcp-server:
+    build: ./mcp-server
+    container_name: faitness-mcp
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3002:3002"
+    restart: unless-stopped
+
 volumes:
   postgres_data:

@@ -1,0 +1,34 @@
+{
+  "name": "ollama-cli",
+  "version": "1.0.0",
+  "description": "CLI para chatear con Ollama usando LangChain",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "bin": {
+    "ollama-cli": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "inquirer": "^12.7.0",
+    "langchain": "^0.3.29",
+    "@langchain/ollama": "^0.1.0",
+    "@langchain/core": "^0.3.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/inquirer": "^9.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0"
+  }
+}

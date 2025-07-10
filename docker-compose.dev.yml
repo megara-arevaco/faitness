@@ -61,5 +61,21 @@ services:
     stdin_open: true
     tty: true
 
+  mcp-server:
+    build:
+      context: ./ai/mcp-server
+      dockerfile: Dockerfile.dev
+    container_name: faitness-mcp-dev
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./ai/mcp-server:/app
+      - /app/node_modules
+      - /app/dist
+    stdin_open: true
+    tty: true
+
 volumes:
   postgres_data_dev:
