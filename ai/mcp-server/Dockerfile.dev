@@ -1,18 +1,20 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copiar package.json y package-lock.json
-COPY package*.json ./
+# Instalar dependencias del sistema para desarrollo
+RUN apk add --no-cache git
 
-# Instalar dependencias
-RUN npm ci
-
-# Copiar el código fuente
 COPY . .
 
-# Exponer puerto (aunque MCP usa stdio, lo exponemos por si necesitamos debug)
+# Copiar package files
+COPY package*.json ./
+
+# Instalar todas las dependencias (incluyendo devDependencies)
+RUN npm install
+
+# Exponer puerto
 EXPOSE 3002
 
-# Comando para desarrollo
-CMD ["npm", "run", "dev"]
+# Comando por defecto para desarrollo (modo HTTP)
+CMD ["npm", "run", "dev:http"]

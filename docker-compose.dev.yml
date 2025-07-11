@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   database:
@@ -65,15 +65,17 @@ services:
     build:
       context: ./ai/mcp-server
       dockerfile: Dockerfile.dev
-    container_name: faitness-mcp-dev
+    container_name: faitness-mcp-server-dev
     environment:
+      API_BASE_URL: http://backend:3001
+      PORT: 3002
       NODE_ENV: development
     ports:
       - "3002:3002"
+    depends_on:
+      - backend
     volumes:
       - ./ai/mcp-server:/app
-      - /app/node_modules
-      - /app/dist
     stdin_open: true
     tty: true
 

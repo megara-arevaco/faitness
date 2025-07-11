@@ -2,20 +2,25 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copiar package.json y package-lock.json
+# Copiar package files
 COPY package*.json ./
 
-# Instalar dependencias (solo producción)
+# Instalar dependencias
 RUN npm ci --only=production
 
-# Copiar el código fuente
+# Copiar código fuente
 COPY . .
 
 # Compilar TypeScript
 RUN npm run build
 
-# Exponer puerto (aunque MCP usa stdio, lo exponemos por si necesitamos debug)
+# Exponer puerto
 EXPOSE 3002
 
-# Comando para producción
-CMD ["npm", "start"]
+# Usuario no-root para seguridad
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+USER nodejs
+
+# Comando por defecto (modo HTTP)
+CMD ["npm", "run", "start:http"]

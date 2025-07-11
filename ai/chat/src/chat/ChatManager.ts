@@ -3,13 +3,16 @@ import chalk from "chalk";
 import ora from "ora";
 import { OllamaClient } from "./OllamaClient";
 import { ChatConfig } from "../types/index";
+import { MCPClient } from "../mcp/MCPClient";
 
 export class ChatManager {
   private client: OllamaClient;
+  private mcpClient: MCPClient;
   private isRunning: boolean = false;
 
   constructor(config: ChatConfig) {
     this.client = new OllamaClient(config);
+    this.mcpClient = new MCPClient();
   }
 
   async startChat(): Promise<void> {
@@ -18,15 +21,34 @@ export class ChatManager {
     console.log(chalk.gray("Escribe '/exit' para salir\n"));
 
     // Verificar conexión con Ollama
-    const spinner = ora("Verificando conexión con Ollama...").start();
+    const ollamaSpinner = ora("Verificando conexión con Ollama...").start();
     const isConnected = await this.client.checkConnection();
     
     if (!isConnected) {
-      spinner.fail("No se pudo conectar con Ollama. Asegúrate de que esté ejecutándose en http://localhost:11434");
+      ollamaSpinner.fail("No se pudo conectar con Ollama. Asegúrate de que esté ejecutándose en http://localhost:11434");
       return;
     }
     
-    spinner.succeed(`Conectado exitosamente. Modelo actual: ${chalk.green(this.client.getCurrentModel())}`);
+    ollamaSpinner.succeed(`Conectado exitosamente. Modelo actual: ${chalk.green(this.client.getCurrentModel())}`);
+
+    // Conectar con el servidor MCP
+    const mcpSpinner = ora("Conectando con herramientas MCP...").start();
+    try {
+      await this.mcpClient.connect();
+      const tools = this.mcpClient.getAvailableTools();
+      mcpSpinner.succeed(`MCP conectado. ${chalk.green(tools.length)} herramientas disponibles`);
+      
+      // Mostrar herramientas disponibles
+      if (tools.length > 0) {
+        console.log(chalk.blue("\n🔧 Herramientas disponibles:"));
+        for (const tool of tools) {
+          console.log(chalk.cyan(`  • ${tool.name}`), chalk.gray(`- ${tool.description}`));
+        }
+        console.log();
+      }
+    } catch (error) {
+      mcpSpinner.warn("No se pudo conectar con MCP (continuando sin herramientas)");
+    }
 
     this.isRunning = true;
     await this.chatLoop();
@@ -55,15 +77,26 @@ export class ChatManager {
           continue;
         }
 
-        // Enviar mensaje al modelo
+        // Enviar mensaje al modelo con contexto de herramientas
         const spinner = ora("Pensando...").start();
         
         try {
-          const response = await this.client.sendMessage(message);
+          const messageWithTools = this.mcpClient.isConnected()
+            ? message + this.mcpClient.getToolsPrompt()
+            : message;
+            
+          const response = await this.client.sendMessage(messageWithTools);
           spinner.stop();
           
-          console.log(chalk.green(`🦙 ${this.client.getCurrentModel()}:`), response);
-          console.log(); // Línea en blanco para separar mensajes
+          // Verificar si el modelo quiere usar una herramienta
+          const toolCall = this.mcpClient.parseToolCall(response);
+          
+          if (toolCall && this.mcpClient.isConnected()) {
+            await this.handleToolCall(toolCall, response);
+          } else {
+            console.log(chalk.green(`🦙 ${this.client.getCurrentModel()}:`), response);
+            console.log(); // Línea en blanco para separar mensajes
+          }
         } catch (error) {
           spinner.fail(`Error: ${error instanceof Error ? error.message : error}`);
         }
@@ -146,5 +179,35 @@ export class ChatManager {
 
   async stop(): Promise<void> {
     this.isRunning = false;
+  }
+
+  private async handleToolCall(toolCall: any, originalResponse: string): Promise<void> {
+    try {
+      console.log(chalk.green(`🦙 ${this.client.getCurrentModel()}:`), originalResponse.replace(/TOOL_CALL:.*/, '').trim());
+      console.log(chalk.yellow(`🔧 Ejecutando herramienta: ${toolCall.name}`));
+      
+      const toolSpinner = ora(`Ejecutando ${toolCall.name}...`).start();
+      
+      const result = await this.mcpClient.callTool(toolCall.name, toolCall.arguments);
+      toolSpinner.succeed(`Herramienta ${toolCall.name} ejecutada`);
+      
+      // Mostrar resultado de la herramienta
+      console.log(chalk.blue("📋 Resultado:"));
+      for (const content of result.content) {
+        if (content.type === 'text') {
+          console.log(chalk.white(content.text));
+        }
+      }
+      console.log(); // Línea en blanco para separar mensajes
+      
+    } catch (error) {
+      console.log(chalk.red(`❌ Error ejecutando herramienta ${toolCall.name}: ${error instanceof Error ? error.message : error}`));
+    }
+  }
+
+  async cleanup(): Promise<void> {
+    if (this.mcpClient.isConnected()) {
+      await this.mcpClient.disconnect();
+    }
   }
 }

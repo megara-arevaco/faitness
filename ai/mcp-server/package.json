@@ -6,7 +6,11 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:stdio": "node dist/index.js --mode=stdio",
+    "start:http": "node dist/index.js --mode=http",
     "dev": "ts-node src/index.ts",
+    "dev:stdio": "ts-node src/index.ts --mode=stdio",
+    "dev:http": "ts-node src/index.ts --mode=http",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -22,7 +26,9 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@fastify/cors": "^8.5.0",
     "@modelcontextprotocol/sdk": "^1.15.0",
+    "fastify": "^4.29.1",
     "zod": "^3.22.4",
     "zod-to-json-schema": "^3.24.6"
   }
