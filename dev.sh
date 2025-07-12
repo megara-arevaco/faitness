@@ -5,49 +5,49 @@
 case "$1" in
     "start")
         echo "🚀 Starting Faitness development environment..."
-        docker-compose -f docker-compose.dev.yml up --build
+        docker compose -f docker-compose.dev.yml up --build
         ;;
     "stop")
         echo "🛑 Stopping Faitness development environment..."
-        docker-compose -f docker-compose.dev.yml down
+        docker compose -f docker-compose.dev.yml down
         ;;
     "restart")
         echo "🔄 Restarting Faitness development environment..."
-        docker-compose -f docker-compose.dev.yml down
-        docker-compose -f docker-compose.dev.yml up --build
+        docker compose -f docker-compose.dev.yml down
+        docker compose -f docker-compose.dev.yml up --build
         ;;
     "logs")
         echo "📋 Showing logs for all services..."
-        docker-compose -f docker-compose.dev.yml logs -f
+        docker compose -f docker-compose.dev.yml logs -f
         ;;
     "backend")
         echo "📋 Showing backend logs..."
-        docker-compose -f docker-compose.dev.yml logs -f backend
+        docker compose -f docker-compose.dev.yml logs -f backend
         ;;
     "frontend")
         echo "📋 Showing frontend logs..."
-        docker-compose -f docker-compose.dev.yml logs -f frontend
+        docker compose -f docker-compose.dev.yml logs -f frontend
         ;;
     "db")
         echo "📋 Showing database logs..."
-        docker-compose -f docker-compose.dev.yml logs -f database
+        docker compose -f docker-compose.dev.yml logs -f database
         ;;
     "clean")
         echo "🧹 Cleaning up development environment..."
-        docker-compose -f docker-compose.dev.yml down -v
+        docker compose -f docker-compose.dev.yml down -v
         docker system prune -f
         ;;
     "shell-backend")
         echo "🐚 Opening shell in backend container..."
-        docker-compose -f docker-compose.dev.yml exec backend sh
+        docker compose -f docker-compose.dev.yml exec backend sh
         ;;
     "shell-frontend")
         echo "🐚 Opening shell in frontend container..."
-        docker-compose -f docker-compose.dev.yml exec frontend sh
+        docker compose -f docker-compose.dev.yml exec frontend sh
         ;;
     "shell-db")
         echo "🐚 Opening shell in database container..."
-        docker-compose -f docker-compose.dev.yml exec database psql -U postgres -d faitness
+        docker compose -f docker-compose.dev.yml exec database psql -U postgres -d faitness
         ;;
     *)
         echo "🔧 Faitness Development Environment"

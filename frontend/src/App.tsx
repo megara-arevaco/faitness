@@ -1,4 +1,3 @@
-import React from "react";
 import ChatWS from "./components/ChatWS";
 
 function App() {
