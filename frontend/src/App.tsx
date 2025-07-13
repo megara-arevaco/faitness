@@ -9,7 +9,7 @@ function App() {
             Chat con LLM
           </h1>
           <p className="text-gray-600">
-            Interfaz de chat simple construida con React y shadcn/ui
+            Interfaz de chat simple construida con React y shadcn/ui lolens molens
           </p>
         </div>
 
